@@ -19,10 +19,10 @@ void CAN_Receiver_Init(void)
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
 
-  // Filter for ID 0x100 (Potentiometer)
-  sFilterConfig.FilterIdHigh = (CAN_POTENTIOMETER_ID << 5);
+  // Accept IDs from 0x100 to 0x107 (mask lower 3 bits)
+  sFilterConfig.FilterIdHigh = (0x100 << 5);      // Base ID 0x100
   sFilterConfig.FilterIdLow = 0x0000;
-  sFilterConfig.FilterMaskIdHigh = (0x7FF << 5);
+  sFilterConfig.FilterMaskIdHigh = (0x7F8 << 5);  // Mask: 111111111000 (ignore last 3 bits)
   sFilterConfig.FilterMaskIdLow = 0x0000;
 
   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
@@ -45,12 +45,29 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
   if(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData) == HAL_OK)
   {
-    if(rxHeader.StdId == CAN_POTENTIOMETER_ID && rxHeader.DLC == 2)
+    switch(rxHeader.StdId)
     {
-      uint16_t pot_value = (rxData[1] << 8) | rxData[0];  // Little-endian
+      case CAN_ID_POTENTIOMETER:
+        if(rxHeader.DLC == 2)
+        {
+          uint16_t pot_value = (rxData[1] << 8) | rxData[0];
+          USART1_SendString("\r\n[Potentiometer] ");
+          USART1_SendNumber(pot_value);
+        }
+        break;
 
-      USART1_SendString("\r\nPotentiometer: ");
-      USART1_SendNumber(pot_value);
+      case CAN_ID_TEMP_HUMD:
+        if(rxHeader.DLC == 4)
+        {
+          USART1_SendString("\r\n[Temp/Humidity] ");
+        }
+        break;
+
+      default:
+        // Unknown ID - print for debugging
+        USART1_SendString("\r\n[Unknown] ID:0x");
+        USART1_SendHex(rxHeader.StdId);
+        break;
     }
   }
 }
