@@ -179,56 +179,6 @@ int main(void)
       }
     }
 
-    // DHT11 Temperature & Humidity - Read & Send @ 1s
-//    if(dht_count++ >= DHT11_READ_TICKS)
-//    {
-//      dht_count = 0;
-//
-//      uint8_t test_temp = 25;
-//      uint8_t test_hum = 60;
-//      CAN_SendTempHumidity(test_temp, test_hum);
-//
-//      USART1_SendString("DHT11: ");
-//      USART1_SendNumber(test_temp);
-//      USART1_SendString("°C, ");
-//      USART1_SendNumber(test_hum);
-//      USART1_SendString("% -> CAN OK\r\n");
-//    }
-
-    // MPU6050 Motion Data - Read & Send @ 50ms
-//    if(mpu_count++ >= MPU_READ_TICKS)
-//    {
-//      mpu_count = 0;
-//
-//      // Temporary test data
-//      static int16_t test_val = 0;
-//      test_val += 100;
-//      CAN_SendAccelerometer(test_val, test_val * 2, test_val * 3);
-//      CAN_SendGyroscope(test_val / 10, test_val / 20, test_val / 30);
-//
-//      // Debug every 20th reading (1 second)
-//      if(mpu_count % 20 == 0)
-//      {
-//        USART1_SendString("MPU6050: Data sent via CAN\r\n");
-//      }
-//    }
-
-    // Node Status - Send @ 1 second
-    if(status_count++ >= STATUS_SEND_TICKS)
-    {
-      status_count = 0;
-
-      // Send node status (0 = OK)
-      CAN_SendStatus(0x00);
-
-      // Send statistics
-      USART1_SendString("Status: OK | CAN Sent: ");
-      USART1_SendNumber(CAN_GetSentCount());
-      USART1_SendString(" | Errors: ");
-      USART1_SendNumber(CAN_GetErrorCount());
-      USART1_SendString("\r\n");
-    }
-
     TIMER3_WaitPeriod(); // 10ms heartbeat
   }
   /* USER CODE END 3 */
