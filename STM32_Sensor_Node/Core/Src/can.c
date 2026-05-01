@@ -7,6 +7,7 @@
 
 #include "can.h"
 #include "usart1.h"
+#include <string.h>
 
 // CAN handle pointer
 static CAN_HandleTypeDef *can_handle;
@@ -104,7 +105,7 @@ CAN_Status_t CAN_SendTempHumidity(uint8_t temp, uint8_t humidity)
   data[0] = temp;      // Temperature in Celsius
   data[1] = humidity;  // Relative humidity in %
 
-  return CAN_SendMessage(CAN_ID_TEMP_HUMIDITY, data, 2);
+  return CAN_SendMessage(CAN_ID_TEMP_HUMD, data, 2);
 }
 
 /* Send accelerometer data (6 bytes) */
@@ -125,7 +126,7 @@ CAN_Status_t CAN_SendAccelerometer(int16_t ax, int16_t ay, int16_t az)
   data[4] = (az >> 8) & 0xFF;    // Accel Z High
   data[5] = az & 0xFF;           // Accel Z Low
 
-  return CAN_SendMessage(CAN_ID_ACCELEROMETER, data, 6);
+  return CAN_SendMessage(CAN_ID_ACCEL, data, 6);
 }
 
 /* Send gyroscope data (6 bytes) */
@@ -146,7 +147,7 @@ CAN_Status_t CAN_SendGyroscope(int16_t gx, int16_t gy, int16_t gz)
   data[4] = (gz >> 8) & 0xFF;    // Gyro Z High
   data[5] = gz & 0xFF;           // Gyro Z Low
 
-  return CAN_SendMessage(CAN_ID_GYROSCOPE, data, 6);
+  return CAN_SendMessage(CAN_ID_GYRO, data, 6);
 }
 
 /* Send node status (1 byte) */

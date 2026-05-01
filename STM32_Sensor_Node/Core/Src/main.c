@@ -30,6 +30,7 @@
 #include "mpu6050.h"
 #include "timer2.h"
 #include "timer3.h"
+#include "can.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,8 +45,10 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define DHT11_READ_TICKS      100
-#define MPU_READ_TICKS        5
+#define ADC_READ_TICKS        10     // Read ADC every 100ms
+#define DHT11_READ_TICKS      100    // Read DHT11 every 1 second
+#define MPU_READ_TICKS        5      // Read MPU6050 every 50ms
+#define STATUS_SEND_TICKS     100    // Send status every 1 second
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -99,20 +102,29 @@ int main(void)
   MX_GPIO_Init();
   MX_CAN_Init();
   /* USER CODE BEGIN 2 */
+
   DWT_Init();
   ADC1_Init();
   USART1_Init();
   TIMER2_Init();
   I2C2_Init();
 
-  // Loop counters
+  // Initialize CAN application
+  CAN_Init(&hcan);
+
+  // Sensor read counters
+  uint16_t adc_count = 0;
   uint16_t dht_count = 0;
   uint16_t mpu_count = 0;
+  uint16_t status_count = 0;
 
   // Initialize sensors
   DS3231_Init();
   MPU6050_Init();
   DHT11_Init();
+
+  USART1_SendString("Sensor Node Ready\r\n");
+  USART1_SendString("==================\r\n");
 
   TIMER3_SetupPeriod(10);  // 10ms period
   /* USER CODE END 2 */
@@ -125,19 +137,99 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-    // Read DHT11 every 1 seconds
+    // ADC Potentiometer - Read & Send @ 100ms
+    if(adc_count++ >= ADC_READ_TICKS)
+    {
+      adc_count = 0;
+
+      // Start ADC conversion
+      ADC1_StartConversion();
+
+      // Wait for conversion complete (with timeout)
+      uint32_t timeout = 100000;
+      while(!adc_data_ready && --timeout);
+
+      if(adc_data_ready)
+      {
+        uint16_t pot_value = adc_buffer;
+        adc_data_ready = 0;
+
+        // Store in global data structure
+        sensor_data.potentiometer = pot_value;
+
+        // Send IMMEDIATELY via CAN
+        if(CAN_SendPotentiometer(pot_value) == CAN_OK)
+        {
+          // Optional: Debug output every 10th reading (1 second)
+          if(adc_count % 10 == 0)
+          {
+            USART1_SendString("ADC: ");
+            USART1_SendNumber(pot_value);
+            USART1_SendString(" -> CAN OK\r\n");
+          }
+        }
+        else
+        {
+          USART1_SendString("CAN Error: Potentiometer!\r\n");
+        }
+      }
+      else
+      {
+        USART1_SendString("ADC Timeout!\r\n");
+      }
+    }
+
+    // DHT11 Temperature & Humidity - Read & Send @ 1s
     if(dht_count++ >= DHT11_READ_TICKS)
     {
       dht_count = 0;
+
+      uint8_t test_temp = 25;
+      uint8_t test_hum = 60;
+      CAN_SendTempHumidity(test_temp, test_hum);
+
+      USART1_SendString("DHT11: ");
+      USART1_SendNumber(test_temp);
+      USART1_SendString("°C, ");
+      USART1_SendNumber(test_hum);
+      USART1_SendString("% -> CAN OK\r\n");
     }
 
-    // Read MPU6050 every 50ms
+    // MPU6050 Motion Data - Read & Send @ 50ms
     if(mpu_count++ >= MPU_READ_TICKS)
     {
       mpu_count = 0;
+
+      // Temporary test data
+      static int16_t test_val = 0;
+      test_val += 100;
+      CAN_SendAccelerometer(test_val, test_val * 2, test_val * 3);
+      CAN_SendGyroscope(test_val / 10, test_val / 20, test_val / 30);
+
+      // Debug every 20th reading (1 second)
+      if(mpu_count % 20 == 0)
+      {
+        USART1_SendString("MPU6050: Data sent via CAN\r\n");
+      }
     }
 
-    TIMER3_WaitPeriod(); // Heart Beat time check
+    // Node Status - Send @ 1 second
+    if(status_count++ >= STATUS_SEND_TICKS)
+    {
+      status_count = 0;
+
+      // Send node status (0 = OK)
+      CAN_SendStatus(0x00);
+
+      // Send statistics
+      USART1_SendString("Status: OK | CAN Sent: ");
+      USART1_SendNumber(CAN_GetSentCount());
+      USART1_SendString(" | Errors: ");
+      USART1_SendNumber(CAN_GetErrorCount());
+      USART1_SendString("\r\n");
+    }
+
+    TIMER3_WaitPeriod(); // 10ms heartbeat
   }
   /* USER CODE END 3 */
 }
