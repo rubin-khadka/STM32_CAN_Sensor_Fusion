@@ -6,7 +6,7 @@
  */
 
 #include "ds3231.h"
-#include "i2c2.h"
+#include "i2c1.h"
 
 DS3231_Time_t current_time;
 
@@ -203,30 +203,30 @@ static uint8_t DS3231_WriteReg(uint8_t reg, uint8_t data)
 {
   uint8_t result;
 
-  I2C2_Start();
+  I2C1_Start();
 
-  result = I2C2_SendAddr(DS3231_ADDR, I2C_WRITE);
+  result = I2C1_SendAddr(DS3231_ADDR, I2C_WRITE);
   if(result != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Send register address
-  if(I2C2_WriteByte(reg) != I2C_OK)
+  if(I2C1_WriteByte(reg) != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Send data
-  if(I2C2_WriteByte(data) != I2C_OK)
+  if(I2C1_WriteByte(data) != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
-  I2C2_Stop();
+  I2C1_Stop();
   return DS3231_OK;
 }
 
@@ -236,38 +236,38 @@ static uint8_t DS3231_ReadReg(uint8_t reg, uint8_t *data)
   uint8_t result;
 
   // Start condition
-  I2C2_Start();
+  I2C1_Start();
 
   // Send device address with write bit to set register pointer
-  result = I2C2_SendAddr(DS3231_ADDR, I2C_WRITE);
+  result = I2C1_SendAddr(DS3231_ADDR, I2C_WRITE);
   if(result != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Send register address to read from
-  if(I2C2_WriteByte(reg) != I2C_OK)
+  if(I2C1_WriteByte(reg) != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Restart condition to switch to read mode
-  I2C2_Start();
+  I2C1_Start();
 
   // Send device address with read bit
-  result = I2C2_SendAddr(DS3231_ADDR, I2C_READ);
+  result = I2C1_SendAddr(DS3231_ADDR, I2C_READ);
   if(result != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Read data with NACK (last byte)
-  *data = I2C2_ReadByte(0);  // 0 = NACK
+  *data = I2C1_ReadByte(0);  // 0 = NACK
 
-  I2C2_Stop();
+  I2C1_Stop();
 
   return DS3231_OK;
 }
@@ -278,33 +278,33 @@ static uint8_t DS3231_WriteMulti(uint8_t reg, uint8_t *data, uint8_t len)
   uint8_t result;
   uint8_t i;
 
-  I2C2_Start();
+  I2C1_Start();
 
-  result = I2C2_SendAddr(DS3231_ADDR, I2C_WRITE);
+  result = I2C1_SendAddr(DS3231_ADDR, I2C_WRITE);
   if(result != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Send starting register address
-  if(I2C2_WriteByte(reg) != I2C_OK)
+  if(I2C1_WriteByte(reg) != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Send all data bytes
   for(i = 0; i < len; i++)
   {
-    if(I2C2_WriteByte(data[i]) != I2C_OK)
+    if(I2C1_WriteByte(data[i]) != I2C_OK)
     {
-      I2C2_Stop();
+      I2C1_Stop();
       return DS3231_ERROR;
     }
   }
 
-  I2C2_Stop();
+  I2C1_Stop();
   return DS3231_OK;
 }
 
@@ -315,31 +315,31 @@ static uint8_t DS3231_ReadMulti(uint8_t reg, uint8_t *data, uint8_t len)
   uint8_t i;
 
   // Start condition
-  I2C2_Start();
+  I2C1_Start();
 
   // Send device address with write bit to set register pointer
-  result = I2C2_SendAddr(DS3231_ADDR, I2C_WRITE);
+  result = I2C1_SendAddr(DS3231_ADDR, I2C_WRITE);
   if(result != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Send starting register address
-  if(I2C2_WriteByte(reg) != I2C_OK)
+  if(I2C1_WriteByte(reg) != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
   // Restart condition to switch to read mode
-  I2C2_Start();
+  I2C1_Start();
 
   // Send device address with read bit
-  result = I2C2_SendAddr(DS3231_ADDR, I2C_READ);
+  result = I2C1_SendAddr(DS3231_ADDR, I2C_READ);
   if(result != I2C_OK)
   {
-    I2C2_Stop();
+    I2C1_Stop();
     return DS3231_ERROR;
   }
 
@@ -349,16 +349,16 @@ static uint8_t DS3231_ReadMulti(uint8_t reg, uint8_t *data, uint8_t len)
     if(i == (len - 1))
     {
       // Last byte, send NACK
-      data[i] = I2C2_ReadByte(0);
+      data[i] = I2C1_ReadByte(0);
     }
     else
     {
       // All other bytes, send ACK
-      data[i] = I2C2_ReadByte(1);
+      data[i] = I2C1_ReadByte(1);
     }
   }
 
-  I2C2_Stop();
+  I2C1_Stop();
 
   return DS3231_OK;
 }

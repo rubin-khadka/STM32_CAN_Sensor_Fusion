@@ -24,7 +24,7 @@
 #include "usart1.h"
 #include "adc1.h"
 #include "dwt.h"
-#include "i2c2.h"
+#include "i2c1.h"
 #include "ds3231.h"
 #include "dht11.h"
 #include "mpu6050.h"
@@ -107,7 +107,7 @@ int main(void)
   ADC1_Init();
   USART1_Init();
   TIMER2_Init();
-  I2C2_Init();
+  I2C1_Init();
 
   // Initialize CAN application
   CAN_Init(&hcan);
@@ -180,38 +180,38 @@ int main(void)
     }
 
     // DHT11 Temperature & Humidity - Read & Send @ 1s
-    if(dht_count++ >= DHT11_READ_TICKS)
-    {
-      dht_count = 0;
-
-      uint8_t test_temp = 25;
-      uint8_t test_hum = 60;
-      CAN_SendTempHumidity(test_temp, test_hum);
-
-      USART1_SendString("DHT11: ");
-      USART1_SendNumber(test_temp);
-      USART1_SendString("°C, ");
-      USART1_SendNumber(test_hum);
-      USART1_SendString("% -> CAN OK\r\n");
-    }
+//    if(dht_count++ >= DHT11_READ_TICKS)
+//    {
+//      dht_count = 0;
+//
+//      uint8_t test_temp = 25;
+//      uint8_t test_hum = 60;
+//      CAN_SendTempHumidity(test_temp, test_hum);
+//
+//      USART1_SendString("DHT11: ");
+//      USART1_SendNumber(test_temp);
+//      USART1_SendString("°C, ");
+//      USART1_SendNumber(test_hum);
+//      USART1_SendString("% -> CAN OK\r\n");
+//    }
 
     // MPU6050 Motion Data - Read & Send @ 50ms
-    if(mpu_count++ >= MPU_READ_TICKS)
-    {
-      mpu_count = 0;
-
-      // Temporary test data
-      static int16_t test_val = 0;
-      test_val += 100;
-      CAN_SendAccelerometer(test_val, test_val * 2, test_val * 3);
-      CAN_SendGyroscope(test_val / 10, test_val / 20, test_val / 30);
-
-      // Debug every 20th reading (1 second)
-      if(mpu_count % 20 == 0)
-      {
-        USART1_SendString("MPU6050: Data sent via CAN\r\n");
-      }
-    }
+//    if(mpu_count++ >= MPU_READ_TICKS)
+//    {
+//      mpu_count = 0;
+//
+//      // Temporary test data
+//      static int16_t test_val = 0;
+//      test_val += 100;
+//      CAN_SendAccelerometer(test_val, test_val * 2, test_val * 3);
+//      CAN_SendGyroscope(test_val / 10, test_val / 20, test_val / 30);
+//
+//      // Debug every 20th reading (1 second)
+//      if(mpu_count % 20 == 0)
+//      {
+//        USART1_SendString("MPU6050: Data sent via CAN\r\n");
+//      }
+//    }
 
     // Node Status - Send @ 1 second
     if(status_count++ >= STATUS_SEND_TICKS)
