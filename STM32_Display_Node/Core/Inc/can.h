@@ -20,6 +20,9 @@ typedef enum {
   CAN_ID_TIMESTAMP      = 0x105
 } CAN_MessageID_t;
 
+extern volatile uint16_t temperature;
+extern volatile uint16_t humidity;
+
 void CAN_Receiver_Init(void);
 void CAN_Start(void);
 

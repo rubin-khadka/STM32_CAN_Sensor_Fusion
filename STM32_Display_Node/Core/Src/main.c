@@ -25,6 +25,8 @@
 #include "usart1.h"
 #include "lcd.h"
 #include "timer2.h"
+#include "timer3.h"
+#include "tasks.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -39,7 +41,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define LCD_UPDATE_TICKS      10
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -104,6 +106,9 @@ int main(void)
   LCD_Init();
   USART1_Init();
 
+  // Loop counters
+  uint16_t lcd_count = 0;
+
   USART1_SendString("CAN Display Node Ready\r\n");
 
   LCD_Clear();
@@ -117,6 +122,8 @@ int main(void)
   CAN_Start();
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
+
+  TIMER3_SetupPeriod(10);  // 10ms period
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -126,7 +133,13 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    HAL_Delay(10);
+    // Update LCD display every 10 ms
+    if(lcd_count++ >= LCD_UPDATE_TICKS)
+    {
+      Task_UpdateDisplay();
+    }
+
+    TIMER3_WaitPeriod(); // Heart Beat time check
   }
   /* USER CODE END 3 */
 }

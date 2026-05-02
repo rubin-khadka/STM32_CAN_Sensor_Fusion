@@ -123,3 +123,53 @@ void LCD_SetCursor(uint8_t row, uint8_t col)
 
   LCD_SendCmd(address);
 }
+
+// Function to display temperature and humidity
+void LCD_DisplayReading_Temp(uint8_t temp_int, uint8_t temp_dec, uint8_t hum_int, uint8_t hum_dec)
+{
+  // LINE 0: TEMP: XX.X C
+  LCD_SetCursor(0, 0);
+  LCD_SendString("TEMP: ");
+
+  // Format temperature: XX.X C
+  if(temp_int >= 10)
+  {
+    LCD_SendData('0' + (temp_int / 10));
+    LCD_SendData('0' + (temp_int % 10));
+  }
+  else
+  {
+    LCD_SendData(' ');
+    LCD_SendData('0' + temp_int);
+  }
+
+  LCD_SendData('.');
+  LCD_SendData('0' + temp_dec);
+  LCD_SendData(' ');
+  LCD_SendData('C');
+
+  // Clear rest of line
+  LCD_SendString("     ");
+
+  // LINE 1: HUMD: XX.X %
+  LCD_SetCursor(1, 0);
+  LCD_SendString("HUMD: ");
+
+  // Format humidity: XX.X
+  if(hum_int >= 10)
+  {
+    LCD_SendData('0' + (hum_int / 10));
+    LCD_SendData('0' + (hum_int % 10));
+  }
+  else
+  {
+    LCD_SendData(' ');
+    LCD_SendData('0' + hum_int);
+  }
+
+  LCD_SendData('.');
+  LCD_SendData('0' + hum_dec);
+  LCD_SendData(' ');
+  LCD_SendData('%');
+  LCD_SendString("    ");
+}
