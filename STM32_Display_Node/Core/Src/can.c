@@ -10,6 +10,9 @@
 #include "main.h"
 
 extern CAN_HandleTypeDef hcan;
+extern TIM_HandleTypeDef htim1;
+
+volatile uint16_t led_brightness = 0;
 
 void CAN_Receiver_Init(void)
 {
@@ -53,6 +56,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
           uint16_t pot_value = (rxData[1] << 8) | rxData[0];
           USART1_SendString("\r\n[Potentiometer] ");
           USART1_SendNumber(pot_value);
+
+          // Scale 0-4095 (ADC) to 0-999 (PWM ARR)
+          led_brightness = (pot_value * 999) / 4095;
+
+          // Update PWM duty cycle
+          __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, led_brightness);
         }
         break;
 

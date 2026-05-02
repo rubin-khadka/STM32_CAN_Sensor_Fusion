@@ -31,6 +31,7 @@
 #include "timer2.h"
 #include "timer3.h"
 #include "can.h"
+#include "tasks.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -176,6 +177,34 @@ int main(void)
       else
       {
         USART1_SendString("ADC Timeout!\r\n");
+      }
+    }
+
+    // DHT11 Temperature & Humidity - Read & Send second
+    if(dht_count++ >= DHT11_READ_TICKS)
+    {
+      dht_count = 0;
+
+      // Read DHT11 sensor
+      Task_DHT11_Read();
+
+      // Send via CAN using raw int/dec parts
+      if(CAN_SendTempHumidity(dht11_humidity1, dht11_humidity2, dht11_temperature1, dht11_temperature2) == CAN_OK)
+      {
+        // Debug output
+        USART1_SendString("DHT11: ");
+        USART1_SendNumber(dht11_temperature1);
+        USART1_SendChar('.');
+        USART1_SendNumber(dht11_temperature2);
+        USART1_SendString("C, ");
+        USART1_SendNumber(dht11_humidity1);
+        USART1_SendChar('.');
+        USART1_SendNumber(dht11_humidity2);
+        USART1_SendString("% -> CAN OK\r\n");
+      }
+      else
+      {
+        USART1_SendString("CAN Error: Temp/Humid!\r\n");
       }
     }
 

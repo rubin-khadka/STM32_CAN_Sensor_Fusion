@@ -60,7 +60,7 @@ extern volatile SensorData_t sensor_data;
 // Function prototypes
 CAN_Status_t CAN_Init(CAN_HandleTypeDef *hcan);
 CAN_Status_t CAN_SendPotentiometer(uint16_t value);
-CAN_Status_t CAN_SendTempHumidity(uint8_t temp, uint8_t humidity);
+CAN_Status_t CAN_SendTempHumidity(uint8_t hum_int, uint8_t hum_dec, uint8_t temp_int, uint8_t temp_dec);
 CAN_Status_t CAN_SendAccelerometer(int16_t ax, int16_t ay, int16_t az);
 CAN_Status_t CAN_SendGyroscope(int16_t gx, int16_t gy, int16_t gz);
 CAN_Status_t CAN_SendStatus(uint8_t status);

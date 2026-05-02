@@ -92,20 +92,22 @@ CAN_Status_t CAN_SendPotentiometer(uint16_t value)
   return CAN_SendMessage(CAN_ID_POTENTIOMETER, data, 2);
 }
 
-/* Send temperature and humidity (2 bytes) */
-CAN_Status_t CAN_SendTempHumidity(uint8_t temp, uint8_t humidity)
+/* Send temperature and humidity*/
+CAN_Status_t CAN_SendTempHumidity(uint8_t hum_int, uint8_t hum_dec, uint8_t temp_int, uint8_t temp_dec)
 {
-  uint8_t data[2];
+  uint8_t data[4];
 
-  // Store in global data
-  sensor_data.temperature = temp;
-  sensor_data.humidity = humidity;
+  // Store in global data as fixed-point
+  sensor_data.temperature = (temp_int * 10) + temp_dec;
+  sensor_data.humidity = (hum_int * 10) + hum_dec;
 
-  // Prepare CAN data
-  data[0] = temp;      // Temperature in Celsius
-  data[1] = humidity;  // Relative humidity in %
+  // Send as little-endian
+  data[0] = sensor_data.temperature & 0xFF;
+  data[1] = (sensor_data.temperature >> 8) & 0xFF;
+  data[2] = sensor_data.humidity & 0xFF;
+  data[3] = (sensor_data.humidity >> 8) & 0xFF;
 
-  return CAN_SendMessage(CAN_ID_TEMP_HUMD, data, 2);
+  return CAN_SendMessage(CAN_ID_TEMP_HUMD, data, 4);
 }
 
 /* Send accelerometer data (6 bytes) */
