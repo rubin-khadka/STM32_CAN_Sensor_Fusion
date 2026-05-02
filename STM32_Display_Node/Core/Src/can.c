@@ -68,7 +68,24 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
       case CAN_ID_TEMP_HUMD:
         if(rxHeader.DLC == 4)
         {
+          // Read fixed-point values (little-endian)
+          uint16_t temp_x10 = (rxData[1] << 8) | rxData[0];
+          uint16_t hum_x10 = (rxData[3] << 8) | rxData[2];
+
+          // Convert to float by dividing by 10
+          float temperature = temp_x10 / 10.0f;
+          float humidity = hum_x10 / 10.0f;
+
+          // Display
           USART1_SendString("\r\n[Temp/Humidity] ");
+          USART1_SendNumber((int) temperature);
+          USART1_SendChar('.');
+          USART1_SendNumber((int) (temperature * 10) % 10);
+          USART1_SendString("C, ");
+          USART1_SendNumber((int) humidity);
+          USART1_SendChar('.');
+          USART1_SendNumber((int) (humidity * 10) % 10);
+          USART1_SendString("%");
         }
         break;
 

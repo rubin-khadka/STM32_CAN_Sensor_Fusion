@@ -36,8 +36,8 @@ typedef struct
   uint16_t potentiometer;
 
   // DHT11
-  uint8_t temperature;
-  uint8_t humidity;
+  uint16_t temperature;
+  uint16_t humidity;
 
   // MPU6050
   int16_t accel_x;
