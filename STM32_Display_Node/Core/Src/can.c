@@ -17,6 +17,17 @@ volatile uint16_t led_brightness = 0;
 volatile uint16_t temperature = 0;
 volatile uint16_t humidity = 0;
 
+static uint8_t last_hour = 0xFF;
+static uint8_t last_minute = 0xFF;
+static uint8_t last_second = 0xFF;
+static uint8_t last_day = 0xFF;
+static uint8_t last_month = 0xFF;
+
+static uint8_t BCD_To_Dec(uint8_t bcd)
+{
+    return ((bcd >> 4) * 10) + (bcd & 0x0F);
+}
+
 void CAN_Receiver_Init(void)
 {
   CAN_FilterTypeDef sFilterConfig;
@@ -83,6 +94,43 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
           USART1_SendChar('.');
           USART1_SendNumber(humidity % 10);
           USART1_SendString("%");
+        }
+        break;
+
+      case CAN_ID_TIMESTAMP:
+        if(rxHeader.DLC == 5)
+        {
+          // Convert BCD to decimal
+          uint8_t hour = BCD_To_Dec(rxData[0]);
+          uint8_t minute = BCD_To_Dec(rxData[1]);
+          uint8_t second = BCD_To_Dec(rxData[2]);
+          uint8_t day = BCD_To_Dec(rxData[3]);
+          uint8_t month = BCD_To_Dec(rxData[4]);
+
+          // Only print if time changed
+          if(hour != last_hour || minute != last_minute || second != last_second)
+          {
+            last_hour = hour;
+            last_minute = minute;
+            last_second = second;
+            last_day = day;
+            last_month = month;
+
+            USART1_SendString("\r\nTime: ");
+            USART1_SendNumber(hour);
+            USART1_SendChar(':');
+            if(minute < 10)
+              USART1_SendChar('0');
+            USART1_SendNumber(minute);
+            USART1_SendChar(':');
+            if(second < 10)
+              USART1_SendChar('0');
+            USART1_SendNumber(second);
+            USART1_SendString("  Date: ");
+            USART1_SendNumber(day);
+            USART1_SendChar('/');
+            USART1_SendNumber(month);
+          }
         }
         break;
 
