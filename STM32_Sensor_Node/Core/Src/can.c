@@ -7,6 +7,7 @@
 
 #include "can.h"
 #include "usart1.h"
+#include "ds3231.h"
 #include <string.h>
 
 // CAN handle pointer
@@ -166,21 +167,20 @@ CAN_Status_t CAN_SendStatus(uint8_t status)
   return CAN_SendMessage(CAN_ID_STATUS, data, 1);
 }
 
-/* Send timestamp (4 bytes) */
-CAN_Status_t CAN_SendTimestamp(uint32_t timestamp)
+// Function to send time (reusable)
+void CAN_SendTime(void)
 {
-  uint8_t data[4];
+  if(DS3231_GetTime(&current_time) == DS3231_OK)
+  {
+    uint8_t data[5];
+    data[0] = current_time.hour;
+    data[1] = current_time.minutes;
+    data[2] = current_time.seconds;
+    data[3] = current_time.dayofmonth;
+    data[4] = current_time.month;
 
-  // Store timestamp
-  sensor_data.timestamp = timestamp;
-
-  // Prepare CAN data (Big Endian)
-  data[0] = (timestamp >> 24) & 0xFF;
-  data[1] = (timestamp >> 16) & 0xFF;
-  data[2] = (timestamp >> 8) & 0xFF;
-  data[3] = timestamp & 0xFF;
-
-  return CAN_SendMessage(CAN_ID_TIMESTAMP, data, 4);
+    CAN_SendMessage(CAN_ID_TIMESTAMP, data, 5);
+  }
 }
 
 /* Get total CAN messages sent */

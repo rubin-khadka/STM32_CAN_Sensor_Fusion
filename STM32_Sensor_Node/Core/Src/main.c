@@ -49,7 +49,7 @@
 #define ADC_READ_TICKS        10     // Read ADC every 100ms
 #define DHT11_READ_TICKS      100    // Read DHT11 every 1 second
 #define MPU_READ_TICKS        5      // Read MPU6050 every 50ms
-#define STATUS_SEND_TICKS     100    // Send status every 1 second
+#define SEND_TIME_TICKS       100    // Send time every 1 second
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -117,7 +117,7 @@ int main(void)
   uint16_t adc_count = 0;
   uint16_t dht_count = 0;
   uint16_t mpu_count = 0;
-  uint16_t status_count = 0;
+  uint16_t timestamp_count = 0;
 
   // Initialize sensors
   DS3231_Init();
@@ -213,6 +213,12 @@ int main(void)
     {
       mpu_count = 0;
       Task_MPU6050_Send();  // Read and Send
+    }
+
+    if(timestamp_count++ >= SEND_TIME_TICKS)
+    {
+      timestamp_count = 0;
+      CAN_SendTime();
     }
 
     TIMER3_WaitPeriod(); // 10ms heartbeat

@@ -49,7 +49,6 @@ typedef struct
 
   // Status
   uint8_t node_status;
-  uint32_t timestamp;
   uint32_t can_sent_count;
   uint32_t can_error_count;
 } SensorData_t;
@@ -64,7 +63,7 @@ CAN_Status_t CAN_SendTempHumidity(uint8_t hum_int, uint8_t hum_dec, uint8_t temp
 CAN_Status_t CAN_SendAccelerometer(int16_t ax, int16_t ay, int16_t az);
 CAN_Status_t CAN_SendGyroscope(int16_t gx, int16_t gy, int16_t gz);
 CAN_Status_t CAN_SendStatus(uint8_t status);
-CAN_Status_t CAN_SendTimestamp(uint32_t timestamp);
+void CAN_SendTime(void);
 void CAN_SendAllSensorData(void);
 uint32_t CAN_GetSentCount(void);
 uint32_t CAN_GetErrorCount(void);
