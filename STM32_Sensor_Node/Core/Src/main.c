@@ -208,6 +208,13 @@ int main(void)
       }
     }
 
+    // Read MPU6050 and send
+    if(mpu_count++ >= MPU_READ_TICKS)
+    {
+      mpu_count = 0;
+      Task_MPU6050_Send();  // Read and Send
+    }
+
     TIMER3_WaitPeriod(); // 10ms heartbeat
   }
   /* USER CODE END 3 */

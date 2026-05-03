@@ -11,6 +11,8 @@
 #include "mpu6050.h"
 #include "ds3231.h"
 #include "timer2.h"
+#include "i2c1.h"
+#include "can.h"
 
 #define MAX_RETRIES 5
 
@@ -55,4 +57,17 @@ void Task_DHT11_Read(void)
 
   // Re-enable interrupts
   __set_PRIMASK(primask);
+}
+
+void Task_MPU6050_Send(void)
+{
+  // Read MPU6050
+  if(MPU6050_ReadAll() == I2C_OK)
+  {
+    // Send accelerometer raw data
+    CAN_SendAccelerometer(mpu6050_data.accel_x, mpu6050_data.accel_y, mpu6050_data.accel_z);
+
+    // Send gyroscope raw data
+    CAN_SendGyroscope(mpu6050_data.gyro_x, mpu6050_data.gyro_y, mpu6050_data.gyro_z);
+  }
 }

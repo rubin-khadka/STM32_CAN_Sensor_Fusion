@@ -9,7 +9,7 @@
 #define MPU6050_H_
 
 #include "stm32f103xb.h"
-#include <stdint.h>
+#include "stdint.h"
 
 // MPU6050 I2C address (7-bit)
 #define MPU6050_ADDR    0x69
@@ -35,7 +35,7 @@
 #define MPU6050_GYRO_CONFIG     0x1B
 #define MPU6050_ACCEL_CONFIG    0x1C
 
-// Data structure for MPU6050 readings
+// Raw data structure
 typedef struct
 {
   int16_t accel_x;
@@ -51,10 +51,20 @@ extern volatile MPU6050_Data_t mpu6050_data;
 
 // Function prototypes
 uint8_t MPU6050_Init(void);
-uint8_t MPU6050_ReadAll(MPU6050_Data_t *data);
-uint8_t MPU6050_ReadAccel(MPU6050_Data_t *data);
-uint8_t MPU6050_ReadGyro(MPU6050_Data_t *data);
-uint8_t MPU6050_ReadTemp(MPU6050_Data_t *data);
+
+// Read functions (read and store raw data)
+uint8_t MPU6050_ReadAll(void);
+uint8_t MPU6050_ReadAccel(void);
+uint8_t MPU6050_ReadGyro(void);
+uint8_t MPU6050_ReadTemp(void);
+
+// Scale functions (convert raw to scaled)
+void MPU6050_ScaleAll(void);
+void MPU6050_ScaleAccel(void);
+void MPU6050_ScaleGyro(void);
+void MPU6050_ScaleTemp(void);
+
+// Individual conversion functions
 float MPU6050_ConvertTemp(int16_t raw_temp);
 float MPU6050_ConvertAccel(int16_t raw_accel);
 float MPU6050_ConvertGyro(int16_t raw_gyro);

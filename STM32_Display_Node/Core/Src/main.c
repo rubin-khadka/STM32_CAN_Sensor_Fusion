@@ -122,7 +122,6 @@ int main(void)
   CAN_Start();
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
-
   TIMER3_SetupPeriod(10);  // 10ms period
   /* USER CODE END 2 */
 
@@ -136,6 +135,7 @@ int main(void)
     // Update LCD display every 10 ms
     if(lcd_count++ >= LCD_UPDATE_TICKS)
     {
+      lcd_count = 0;
       Task_UpdateDisplay();
     }
 

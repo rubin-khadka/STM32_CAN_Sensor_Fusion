@@ -7,6 +7,7 @@
 
 #include "ds3231.h"
 #include "i2c1.h"
+#include "usart1.h"
 
 DS3231_Time_t current_time;
 
@@ -57,6 +58,7 @@ uint8_t DS3231_Init(void)
     DS3231_GetTime(&current_time);
   }
 
+  USART1_SendString("DS3231 initialized successfully!\r\n");
   return DS3231_OK;
 }
 
