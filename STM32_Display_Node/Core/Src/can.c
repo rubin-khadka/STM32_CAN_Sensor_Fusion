@@ -20,12 +20,37 @@ volatile uint16_t humidity = 0;
 static uint8_t last_hour = 0xFF;
 static uint8_t last_minute = 0xFF;
 static uint8_t last_second = 0xFF;
-static uint8_t last_day = 0xFF;
-static uint8_t last_month = 0xFF;
 
 static uint8_t BCD_To_Dec(uint8_t bcd)
 {
-    return ((bcd >> 4) * 10) + (bcd & 0x0F);
+  return ((bcd >> 4) * 10) + (bcd & 0x0F);
+}
+
+// Scale accelerometer raw to g (±2g range: 16384 LSB/g)
+static float Accel_To_g(int16_t raw)
+{
+  return raw / 16384.0f;
+}
+
+// Scale gyroscope raw to °/s (±250°/s range: 131 LSB/°/s)
+static float Gyro_To_dps(int16_t raw)
+{
+  return raw / 131.0f;
+}
+
+// Print float with 2 decimal places
+void Print_Float(float value)
+{
+  int16_t int_part = (int16_t) value;
+  int16_t dec_part = (int16_t) ((value - int_part) * 100);
+  if(dec_part < 0)
+    dec_part = -dec_part;
+
+  USART1_SendNumber(int_part);
+  USART1_SendChar('.');
+  if(dec_part < 10)
+    USART1_SendChar('0');
+  USART1_SendNumber(dec_part);
 }
 
 void CAN_Receiver_Init(void)
@@ -97,46 +122,77 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         }
         break;
 
+      case CAN_ID_ACCEL:
+        if(rxHeader.DLC == 6)
+        {
+          int16_t accel_x = (rxData[0] << 8) | rxData[1];
+          int16_t accel_y = (rxData[2] << 8) | rxData[3];
+          int16_t accel_z = (rxData[4] << 8) | rxData[5];
+
+          // Scale to g
+          float ax_g = Accel_To_g(accel_x);
+          float ay_g = Accel_To_g(accel_y);
+          float az_g = Accel_To_g(accel_z);
+
+          USART1_SendString("\r\nAccel (g): ");
+          Print_Float(ax_g);
+          USART1_SendString(", ");
+          Print_Float(ay_g);
+          USART1_SendString(", ");
+          Print_Float(az_g);
+        }
+        break;
+
+      case CAN_ID_GYRO:
+        if(rxHeader.DLC == 6)
+        {
+          int16_t gyro_x = (rxData[0] << 8) | rxData[1];
+          int16_t gyro_y = (rxData[2] << 8) | rxData[3];
+          int16_t gyro_z = (rxData[4] << 8) | rxData[5];
+
+          // Scale to °/s
+          float gx_dps = Gyro_To_dps(gyro_x);
+          float gy_dps = Gyro_To_dps(gyro_y);
+          float gz_dps = Gyro_To_dps(gyro_z);
+
+          USART1_SendString("\r\nGyro (°/s): ");
+          Print_Float(gx_dps);
+          USART1_SendString(", ");
+          Print_Float(gy_dps);
+          USART1_SendString(", ");
+          Print_Float(gz_dps);
+        }
+        break;
+
       case CAN_ID_TIMESTAMP:
         if(rxHeader.DLC == 5)
         {
-          // Convert BCD to decimal
           uint8_t hour = BCD_To_Dec(rxData[0]);
           uint8_t minute = BCD_To_Dec(rxData[1]);
           uint8_t second = BCD_To_Dec(rxData[2]);
-          uint8_t day = BCD_To_Dec(rxData[3]);
-          uint8_t month = BCD_To_Dec(rxData[4]);
 
-          // Only print if time changed
-          if(hour != last_hour || minute != last_minute || second != last_second)
-          {
-            last_hour = hour;
-            last_minute = minute;
-            last_second = second;
-            last_day = day;
-            last_month = month;
+          last_hour = hour;
+          last_minute = minute;
+          last_second = second;
 
-            USART1_SendString("\r\nTime: ");
-            USART1_SendNumber(hour);
-            USART1_SendChar(':');
-            if(minute < 10)
-              USART1_SendChar('0');
-            USART1_SendNumber(minute);
-            USART1_SendChar(':');
-            if(second < 10)
-              USART1_SendChar('0');
-            USART1_SendNumber(second);
-            USART1_SendString("  Date: ");
-            USART1_SendNumber(day);
-            USART1_SendChar('/');
-            USART1_SendNumber(month);
-          }
+          USART1_SendString("\r\nTime: ");
+          if(hour < 10)
+            USART1_SendChar('0');
+          USART1_SendNumber(hour);
+          USART1_SendChar(':');
+          if(minute < 10)
+            USART1_SendChar('0');
+          USART1_SendNumber(minute);
+          USART1_SendChar(':');
+          if(second < 10)
+            USART1_SendChar('0');
+          USART1_SendNumber(second);
         }
         break;
 
       default:
         // Unknown ID - print for debugging
-        USART1_SendString("\r\n[Unknown] ID:0x");
+        USART1_SendString("\r\nUnknown ID:0x");
         USART1_SendHex(rxHeader.StdId);
         break;
     }
