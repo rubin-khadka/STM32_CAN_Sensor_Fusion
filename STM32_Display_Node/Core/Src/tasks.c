@@ -33,3 +33,41 @@ void Task_UpdateDisplay(void)
     LCD_DisplayReading_Temp(temp_int, temp_dec, hum_int, hum_dec);
   }
 }
+
+void Task_UpdateDisplay(void)
+{
+  static DisplayMode_t current_mode = DISPLAY_MODE_TEMP_HUM;
+
+  // Check if new display mode received via CAN
+  if(can_rx_data.display_mode_updated)
+  {
+    can_rx_data.display_mode_updated = 0;
+
+    current_mode = (DisplayMode_t) can_rx_data.display_mode;
+    LCD_Clear();  // Clear screen for new mode
+
+    USART1_SendString("Display Mode Changed: ");
+    USART1_SendNumber(current_mode);
+    USART1_SendString("\r\n");
+  }
+
+  // Update display based on current mode
+  switch(current_mode)
+  {
+    case DISPLAY_MODE_TEMP_HUM:
+      // Your existing temp/hum display code
+      break;
+
+    case DISPLAY_MODE_DATE_TIME:
+      // Add time/date display code
+      break;
+
+    case DISPLAY_MODE_ACCEL:
+      // Add accelerometer display code
+      break;
+
+    case DISPLAY_MODE_GYRO:
+      // Add gyroscope display code
+      break;
+  }
+}

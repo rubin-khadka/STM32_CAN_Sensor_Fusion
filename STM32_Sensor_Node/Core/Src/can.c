@@ -183,6 +183,16 @@ void CAN_SendTime(void)
   }
 }
 
+CAN_Status_t CAN_SendDisplayMode(uint8_t mode)
+{
+  uint8_t data[1];
+
+  // Prepare CAN data
+  data[0] = mode;  // 0=TEMP_HUM, 1=DATE_TIME, 2=ACCEL, 3=GYRO
+
+  return CAN_SendMessage(CAN_ID_DISPLAY_MODE, data, 1);
+}
+
 /* Get total CAN messages sent */
 uint32_t CAN_GetSentCount(void)
 {

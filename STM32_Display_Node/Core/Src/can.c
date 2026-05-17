@@ -27,7 +27,9 @@ volatile struct
   uint8_t accel_updated;
   uint8_t gyro_updated;
   uint8_t time_updated;
+  uint8_t display_mode_updated;
 
+  uint8_t display_mode;
   uint16_t pot_val;
   uint16_t temp_val;
   uint16_t hum_val;
@@ -152,6 +154,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
           can_rx_data.min = BCD_To_Dec(rxData[1]);
           can_rx_data.sec = BCD_To_Dec(rxData[2]);
           can_rx_data.time_updated = 1;
+        }
+        break;
+
+      case CAN_ID_DISPLAY_MODE:
+        if(rxHeader.DLC >= 1)
+        {
+          can_rx_data.display_mode = rxData[0];
+          can_rx_data.display_mode_updated = 1;
         }
         break;
 

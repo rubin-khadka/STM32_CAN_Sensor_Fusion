@@ -32,6 +32,7 @@
 #include "timer3.h"
 #include "can.h"
 #include "tasks.h"
+#include "button.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,6 +109,7 @@ int main(void)
   ADC1_Init();
   USART1_Init();
   TIMER2_Init();
+  TIMER4_Init();
   I2C1_Init();
 
   // Initialize CAN application
@@ -127,6 +129,8 @@ int main(void)
   USART1_SendString("Sensor Node Ready\r\n");
   USART1_SendString("==================\r\n");
 
+  Button_Init();
+
   TIMER3_SetupPeriod(10);  // 10ms period
   /* USER CODE END 2 */
 
@@ -137,6 +141,25 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+    if(button_mode_changed)
+    {
+      button_mode_changed = 0;
+
+      DisplayMode_t mode = Button_GetMode();
+
+      // Send display mode via CAN
+      if(CAN_SendDisplayMode((uint8_t) mode) == CAN_OK)
+      {
+        USART1_SendString("BTN: Mode ");
+        USART1_SendNumber(mode);
+        USART1_SendString(" sent via CAN\r\n");
+      }
+      else
+      {
+        USART1_SendString("CAN Error: Display Mode!\r\n");
+      }
+    }
 
     // ADC Potentiometer - Read & Send @ 10ms
     if(adc_count++ >= ADC_READ_TICKS)

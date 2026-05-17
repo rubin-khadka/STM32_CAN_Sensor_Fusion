@@ -17,7 +17,8 @@ typedef enum {
   CAN_ID_ACCEL          = 0x102,
   CAN_ID_GYRO           = 0x103,
   CAN_ID_STATUS         = 0x104,
-  CAN_ID_TIMESTAMP      = 0x105
+  CAN_ID_TIMESTAMP      = 0x105,
+  CAN_ID_DISPLAY_MODE   = 0x106
 } CAN_MessageID_t;
 
 extern volatile uint16_t temperature;

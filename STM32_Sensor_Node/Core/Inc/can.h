@@ -17,7 +17,8 @@ typedef enum
   CAN_ID_ACCEL          = 0x102,
   CAN_ID_GYRO           = 0x103,
   CAN_ID_STATUS         = 0x104,
-  CAN_ID_TIMESTAMP      = 0x105
+  CAN_ID_TIMESTAMP      = 0x105,
+  CAN_ID_DISPLAY_MODE   = 0x106
 } CAN_MessageID_t;
 
 // CAN status
@@ -63,6 +64,8 @@ CAN_Status_t CAN_SendTempHumidity(uint8_t hum_int, uint8_t hum_dec, uint8_t temp
 CAN_Status_t CAN_SendAccelerometer(int16_t ax, int16_t ay, int16_t az);
 CAN_Status_t CAN_SendGyroscope(int16_t gx, int16_t gy, int16_t gz);
 CAN_Status_t CAN_SendStatus(uint8_t status);
+CAN_Status_t CAN_SendDisplayMode(uint8_t mode);
+
 void CAN_SendTime(void);
 void CAN_SendAllSensorData(void);
 uint32_t CAN_GetSentCount(void);
