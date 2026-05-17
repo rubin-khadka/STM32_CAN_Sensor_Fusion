@@ -19,6 +19,10 @@ volatile uint16_t pot_value_raw = 0;
 volatile uint16_t temperature = 0;
 volatile uint16_t humidity = 0;
 
+static uint8_t last_hour = 0xFF;
+static uint8_t last_minute = 0xFF;
+static uint8_t last_second = 0xFF;
+
 // Structure to pass data from ISR to main loop
 volatile struct
 {
@@ -37,10 +41,6 @@ volatile struct
   int16_t gyro[3];
   uint8_t hour, min, sec;
 } can_rx_data = { 0 };
-
-static uint8_t last_hour = 0xFF;
-static uint8_t last_minute = 0xFF;
-static uint8_t last_second = 0xFF;
 
 static uint8_t BCD_To_Dec(uint8_t bcd)
 {
@@ -162,6 +162,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         {
           can_rx_data.display_mode = rxData[0];
           can_rx_data.display_mode_updated = 1;
+
+          // ADD THIS DEBUG PRINT
+          USART1_SendString("\r\n[CAN RX] Display Mode: ");
+          USART1_SendNumber(rxData[0]);
+          USART1_SendString("\r\n");
         }
         break;
 

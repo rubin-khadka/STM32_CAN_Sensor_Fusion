@@ -22,6 +22,7 @@ void LCD_SendData(uint8_t data);
 void LCD_SendString(char *str);
 void LCD_Clear(void);
 void LCD_SetCursor(uint8_t row, uint8_t col);
+void LCD_SendNumber(int32_t num);
 
 // LCD Display Functions
 void LCD_DisplayReading_Temp(uint8_t temp_int, uint8_t temp_dec, uint8_t hum_int, uint8_t hum_dec);

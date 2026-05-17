@@ -7,32 +7,35 @@
 
 #include "lcd.h"
 #include "can.h"
+#include "usart1.h"
 
-// Holds current value
-static uint8_t last_temp_int = 0;
-static uint8_t last_temp_dec = 0;
-static uint8_t last_hum_int = 0;
-static uint8_t last_hum_dec = 0;
-
-void Task_UpdateDisplay(void)
+extern volatile struct
 {
-  // Extract integer and decimal parts
-  uint8_t temp_int = temperature / 10;
-  uint8_t temp_dec = temperature % 10;
-  uint8_t hum_int = humidity / 10;
-  uint8_t hum_dec = humidity % 10;
+  uint8_t pot_updated;
+  uint8_t temp_hum_updated;
+  uint8_t accel_updated;
+  uint8_t gyro_updated;
+  uint8_t time_updated;
+  uint8_t display_mode_updated;
 
-  // Update only if values changed
-  if(temp_int != last_temp_int || temp_dec != last_temp_dec || hum_int != last_hum_int || hum_dec != last_hum_dec)
-  {
-    last_temp_int = temp_int;
-    last_temp_dec = temp_dec;
-    last_hum_int = hum_int;
-    last_hum_dec = hum_dec;
+  uint8_t display_mode;
+  uint16_t pot_val;
+  uint16_t temp_val;
+  uint16_t hum_val;
+  int16_t accel[3];
+  int16_t gyro[3];
+  uint8_t hour, min, sec;
+} can_rx_data;
 
-    LCD_DisplayReading_Temp(temp_int, temp_dec, hum_int, hum_dec);
-  }
-}
+// Display modes
+typedef enum
+{
+  DISPLAY_MODE_TEMP_HUM = 0,
+  DISPLAY_MODE_DATE_TIME,
+  DISPLAY_MODE_ACCEL,
+  DISPLAY_MODE_GYRO,
+  DISPLAY_MODE_COUNT
+} DisplayMode_t;
 
 void Task_UpdateDisplay(void)
 {
@@ -44,9 +47,9 @@ void Task_UpdateDisplay(void)
     can_rx_data.display_mode_updated = 0;
 
     current_mode = (DisplayMode_t) can_rx_data.display_mode;
-    LCD_Clear();  // Clear screen for new mode
+    LCD_Clear();
 
-    USART1_SendString("Display Mode Changed: ");
+    USART1_SendString("Display Mode: ");
     USART1_SendNumber(current_mode);
     USART1_SendString("\r\n");
   }
@@ -55,19 +58,34 @@ void Task_UpdateDisplay(void)
   switch(current_mode)
   {
     case DISPLAY_MODE_TEMP_HUM:
-      // Your existing temp/hum display code
+      LCD_SetCursor(0, 0);
+      LCD_SendString("TEMP:    ");
+      LCD_SetCursor(1, 0);
+      LCD_SendString("HUMD:    ");
       break;
 
     case DISPLAY_MODE_DATE_TIME:
-      // Add time/date display code
+      LCD_SetCursor(0, 0);
+      LCD_SendString("TIME:    ");
+      LCD_SetCursor(1, 0);
+      LCD_SendString("DATE:    ");
       break;
 
     case DISPLAY_MODE_ACCEL:
-      // Add accelerometer display code
+      LCD_SetCursor(0, 0);
+      LCD_SendString("ACCEL:   ");
+      LCD_SetCursor(1, 0);
+      LCD_SendString("XYZ:     ");
       break;
 
     case DISPLAY_MODE_GYRO:
-      // Add gyroscope display code
+      LCD_SetCursor(0, 0);
+      LCD_SendString("GYRO:    ");
+      LCD_SetCursor(1, 0);
+      LCD_SendString("XYZ:     ");
+      break;
+
+    default:
       break;
   }
 }

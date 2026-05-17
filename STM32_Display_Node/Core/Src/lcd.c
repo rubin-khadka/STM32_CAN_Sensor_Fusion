@@ -124,6 +124,47 @@ void LCD_SetCursor(uint8_t row, uint8_t col)
   LCD_SendCmd(address);
 }
 
+// Send integer number to LCD
+void LCD_SendNumber(int32_t num)
+{
+  char buffer[12];  // Enough for -2147483648
+  uint8_t i = 0;
+  uint8_t is_negative = 0;
+
+  // Handle zero
+  if(num == 0)
+  {
+    LCD_SendData('0');
+    return;
+  }
+
+  // Handle negative numbers
+  if(num < 0)
+  {
+    is_negative = 1;
+    num = -num;
+  }
+
+  // Extract digits (reversed)
+  while(num > 0)
+  {
+    buffer[i++] = '0' + (num % 10);
+    num /= 10;
+  }
+
+  // Add negative sign
+  if(is_negative)
+  {
+    buffer[i++] = '-';
+  }
+
+  // Send in correct order (reverse)
+  while(i > 0)
+  {
+    LCD_SendData(buffer[--i]);
+  }
+}
+
 // Function to display temperature and humidity
 void LCD_DisplayReading_Temp(uint8_t temp_int, uint8_t temp_dec, uint8_t hum_int, uint8_t hum_dec)
 {

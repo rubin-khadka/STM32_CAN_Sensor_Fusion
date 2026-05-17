@@ -24,39 +24,39 @@ void Button_Init(void)
   RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN;
 
   // GPIO Configuration for button
-  // A0 for display mode switch
-  GPIOA->CRL &= ~(GPIO_CRL_MODE0 | GPIO_CRL_CNF0);
-  GPIOA->CRL |= GPIO_CRL_CNF0_1;  // Input mode push-pull
-  GPIOA->ODR |= GPIO_ODR_ODR0;    // GPIO pull-up
+  // PA1 for display mode switch
+  GPIOA->CRL &= ~(GPIO_CRL_MODE1 | GPIO_CRL_CNF1);
+  GPIOA->CRL |= GPIO_CRL_CNF1_1;  // Input mode pull-up/pull-down
+  GPIOA->ODR |= GPIO_ODR_ODR1;    // GPIO pull-up on PA1
 
-  // Connect PA0 to External Interrupt 0
-  AFIO->EXTICR[0] &= ~AFIO_EXTICR1_EXTI0;
-  AFIO->EXTICR[0] |= AFIO_EXTICR1_EXTI0_PA;
+  // Connect PA1 to External Interrupt 1
+  AFIO->EXTICR[0] &= ~AFIO_EXTICR1_EXTI1;
+  AFIO->EXTICR[0] |= AFIO_EXTICR1_EXTI1_PA;
 
   // Disable interrupt while configuring
-  EXTI->IMR &= ~(EXTI_IMR_MR0);
+  EXTI->IMR &= ~(EXTI_IMR_MR1);
 
-  // Configure trigger edge (Low)
-  EXTI->FTSR |= EXTI_FTSR_TR0;
-  EXTI->RTSR &= ~(EXTI_RTSR_TR0);
+  // Configure trigger edge (Falling edge - button press)
+  EXTI->FTSR |= EXTI_FTSR_TR1;
+  EXTI->RTSR &= ~(EXTI_RTSR_TR1);
 
   // Clear any pending interrupt
-  EXTI->PR |= EXTI_PR_PR0;
+  EXTI->PR |= EXTI_PR_PR1;
 
   // Enable interrupt
-  EXTI->IMR |= EXTI_IMR_MR0;
+  EXTI->IMR |= EXTI_IMR_MR1;
 
   // Enable in NVIC
-  NVIC_EnableIRQ(EXTI0_IRQn);
+  NVIC_EnableIRQ(EXTI1_IRQn);
 }
 
-// EXTI0 Interrupt Handler
-void EXTI0_IRQHandler(void)
+// EXTI1 Interrupt Handler
+void EXTI1_IRQHandler(void)
 {
-  if(EXTI->PR & EXTI_PR_PR0)
+  if(EXTI->PR & EXTI_PR_PR1)
   {
-    EXTI->IMR &= ~EXTI_IMR_MR0;
-    EXTI->PR |= EXTI_PR_PR0;
+    EXTI->IMR &= ~EXTI_IMR_MR1;
+    EXTI->PR |= EXTI_PR_PR1;
 
     button1_pressed = 1;
 
@@ -101,13 +101,13 @@ void TIM4_IRQHandler(void)
     // Button 1
     if(button1_pressed)
     {
-      if(!(GPIOA->IDR & GPIO_IDR_IDR0))
+      if(!(GPIOA->IDR & GPIO_IDR_IDR1))
       {
         button1_pressed = 0;
         Button_NextMode();
         button_mode_changed = 1;
       }
-      EXTI->IMR |= EXTI_IMR_MR0;
+      EXTI->IMR |= EXTI_IMR_MR1;
     }
   }
 }
