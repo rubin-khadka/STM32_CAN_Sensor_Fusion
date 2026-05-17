@@ -41,7 +41,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define LCD_UPDATE_TICKS      10
+#define LCD_UPDATE_TICKS      50
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -122,7 +122,7 @@ int main(void)
   CAN_Start();
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
-  TIMER3_SetupPeriod(10);  // 10ms period
+  TIMER3_SetupPeriod(2);  // 2ms period
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -132,6 +132,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+    // Process any new CAN data
+    CAN_ProcessNewData();
+
     // Update LCD display every 10 ms
     if(lcd_count++ >= LCD_UPDATE_TICKS)
     {

@@ -25,5 +25,6 @@ extern volatile uint16_t humidity;
 
 void CAN_Receiver_Init(void);
 void CAN_Start(void);
+void CAN_ProcessNewData(void);
 
 #endif /* INC_CAN_H_ */
