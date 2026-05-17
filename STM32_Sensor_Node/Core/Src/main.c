@@ -46,7 +46,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define ADC_READ_TICKS        10     // Read ADC every 100ms
+#define ADC_READ_TICKS        1     // Read ADC every 100ms
 #define DHT11_READ_TICKS      100    // Read DHT11 every 1 second
 #define MPU_READ_TICKS        5      // Read MPU6050 every 50ms
 #define SEND_TIME_TICKS       100    // Send time every 1 second
@@ -138,15 +138,13 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-    // ADC Potentiometer - Read & Send @ 100ms
+    // ADC Potentiometer - Read & Send @ 10ms
     if(adc_count++ >= ADC_READ_TICKS)
     {
-      adc_count = 0;
-
       // Start ADC conversion
       ADC1_StartConversion();
 
-      // Wait for conversion complete (with timeout)
+      // Wait for conversion complete
       uint32_t timeout = 100000;
       while(!adc_data_ready && --timeout);
 
@@ -161,13 +159,9 @@ int main(void)
         // Send IMMEDIATELY via CAN
         if(CAN_SendPotentiometer(pot_value) == CAN_OK)
         {
-          // Optional: Debug output every 10th reading (1 second)
-          if(adc_count % 10 == 0)
-          {
-            USART1_SendString("ADC: ");
-            USART1_SendNumber(pot_value);
-            USART1_SendString(" -> CAN OK\r\n");
-          }
+          USART1_SendString("ADC: ");
+          USART1_SendNumber(pot_value);
+          USART1_SendString(" -> CAN OK\r\n");
         }
         else
         {
@@ -178,13 +172,13 @@ int main(void)
       {
         USART1_SendString("ADC Timeout!\r\n");
       }
+
+      adc_count = 0;
     }
 
     // DHT11 Temperature & Humidity - Read & Send second
     if(dht_count++ >= DHT11_READ_TICKS)
     {
-      dht_count = 0;
-
       // Read DHT11 sensor
       Task_DHT11_Read();
 
@@ -206,20 +200,22 @@ int main(void)
       {
         USART1_SendString("CAN Error: Temp/Humid!\r\n");
       }
+
+      dht_count = 0;
     }
 
     // Read MPU6050 and send
-    if(mpu_count++ >= MPU_READ_TICKS)
-    {
-      mpu_count = 0;
-      Task_MPU6050_Send();  // Read and Send
-    }
-
-    if(timestamp_count++ >= SEND_TIME_TICKS)
-    {
-      timestamp_count = 0;
-      CAN_SendTime();
-    }
+//    if(mpu_count++ >= MPU_READ_TICKS)
+//    {
+//      mpu_count = 0;
+//      Task_MPU6050_Send();  // Read and Send
+//    }
+//
+//    if(timestamp_count++ >= SEND_TIME_TICKS)
+//    {
+//      timestamp_count = 0;
+//      CAN_SendTime();
+//    }
 
     TIMER3_WaitPeriod(); // 10ms heartbeat
   }
@@ -262,10 +258,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
-  /** Enables the Clock Security System
-   */
-  HAL_RCC_EnableCSS();
 }
 
 /**
