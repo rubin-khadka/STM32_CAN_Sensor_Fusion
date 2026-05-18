@@ -13,15 +13,6 @@ extern CAN_HandleTypeDef hcan;
 extern TIM_HandleTypeDef htim1;
 
 volatile uint16_t led_brightness = 0;
-volatile uint8_t new_pot_value = 0;
-volatile uint16_t pot_value_raw = 0;
-
-volatile uint16_t temperature = 0;
-volatile uint16_t humidity = 0;
-
-static uint8_t last_hour = 0xFF;
-static uint8_t last_minute = 0xFF;
-static uint8_t last_second = 0xFF;
 
 // Structure to pass data from ISR to main loop
 volatile struct
@@ -40,6 +31,7 @@ volatile struct
   int16_t accel[3];
   int16_t gyro[3];
   uint8_t hour, min, sec;
+  uint8_t day, month, year;
 } can_rx_data = { 0 };
 
 static uint8_t BCD_To_Dec(uint8_t bcd)
@@ -136,11 +128,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         break;
 
       case CAN_ID_TIMESTAMP:
-        if(rxHeader.DLC == 5)
+        if(rxHeader.DLC >= 6)
         {
           can_rx_data.hour = BCD_To_Dec(rxData[0]);
           can_rx_data.min = BCD_To_Dec(rxData[1]);
           can_rx_data.sec = BCD_To_Dec(rxData[2]);
+          can_rx_data.day = BCD_To_Dec(rxData[3]);
+          can_rx_data.month = BCD_To_Dec(rxData[4]);
+          can_rx_data.year = rxData[5];
           can_rx_data.time_updated = 1;
         }
         break;

@@ -172,14 +172,15 @@ void CAN_SendTime(void)
 {
   if(DS3231_GetTime(&current_time) == DS3231_OK)
   {
-    uint8_t data[5];
+    uint8_t data[6];
     data[0] = current_time.hour;
     data[1] = current_time.minutes;
     data[2] = current_time.seconds;
     data[3] = current_time.dayofmonth;
     data[4] = current_time.month;
+    data[5] = current_time.year;
 
-    CAN_SendMessage(CAN_ID_TIMESTAMP, data, 5);
+    CAN_SendMessage(CAN_ID_TIMESTAMP, data, 6);
   }
 }
 

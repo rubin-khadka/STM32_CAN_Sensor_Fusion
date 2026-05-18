@@ -25,6 +25,7 @@ extern volatile struct
   int16_t accel[3];
   int16_t gyro[3];
   uint8_t hour, min, sec;
+  uint8_t day, month, year;
 } can_rx_data;
 
 // Display modes
@@ -108,9 +109,20 @@ void Task_UpdateDisplay(void)
         LCD_SendNumber(can_rx_data.sec);
         LCD_SendString("  ");
 
-        // Line 1: Date (static for now, you can add date data later)
+        // Line 1: Date
         LCD_SetCursor(1, 0);
-        LCD_SendString("DATE: 17/05/26");
+        LCD_SendString("DATE: ");
+        if(can_rx_data.day < 10)
+          LCD_SendData('0');
+        LCD_SendNumber(can_rx_data.day);
+        LCD_SendData('/');
+        if(can_rx_data.month < 10)
+          LCD_SendData('0');
+        LCD_SendNumber(can_rx_data.month);
+        LCD_SendString("/20");
+        if(can_rx_data.year < 10)
+          LCD_SendData('0');
+        LCD_SendNumber(can_rx_data.year);
 
         // Debug
         USART1_SendString("\r\n[TIME] ");
@@ -119,6 +131,12 @@ void Task_UpdateDisplay(void)
         USART1_SendNumber(can_rx_data.min);
         USART1_SendChar(':');
         USART1_SendNumber(can_rx_data.sec);
+        USART1_SendString(" | DATE: ");
+        USART1_SendNumber(can_rx_data.day);
+        USART1_SendChar('/');
+        USART1_SendNumber(can_rx_data.month);
+        USART1_SendString("/20");
+        USART1_SendNumber(can_rx_data.year);
       }
       break;
 
