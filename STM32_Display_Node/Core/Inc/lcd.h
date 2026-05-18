@@ -26,5 +26,7 @@ void LCD_SendNumber(int32_t num);
 
 // LCD Display Functions
 void LCD_DisplayReading_Temp(uint8_t temp_int, uint8_t temp_dec, uint8_t hum_int, uint8_t hum_dec);
+void LCD_DisplayAccelScaled(float ax, float ay, float az);
+void LCD_DisplayGyroScaled(float gx, float gy, float gz);
 
 #endif /* LCD_H_ */
