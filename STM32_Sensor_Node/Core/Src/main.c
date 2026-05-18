@@ -182,9 +182,9 @@ int main(void)
         // Send IMMEDIATELY via CAN
         if(CAN_SendPotentiometer(pot_value) == CAN_OK)
         {
-          USART1_SendString("ADC: ");
-          USART1_SendNumber(pot_value);
-          USART1_SendString(" -> CAN OK\r\n");
+//          USART1_SendString("ADC: ");
+//          USART1_SendNumber(pot_value);
+//          USART1_SendString(" -> CAN OK\r\n");
         }
         else
         {
@@ -228,16 +228,16 @@ int main(void)
     }
 
     // Read MPU6050 and send
-//    if(mpu_count++ >= MPU_READ_TICKS)
-//    {
-//      mpu_count = 0;
-//      Task_MPU6050_Send();  // Read and Send
-//    }
+    if(mpu_count++ >= MPU_READ_TICKS)
+    {
+      mpu_count = 0;
+      Task_MPU6050_Send();  // Read and Send
+    }
 //
 //    if(timestamp_count++ >= SEND_TIME_TICKS)
 //    {
 //      timestamp_count = 0;
-//      CAN_SendTime();
+//     CAN_SendTime();
 //    }
 
     TIMER3_WaitPeriod(); // 10ms heartbeat
