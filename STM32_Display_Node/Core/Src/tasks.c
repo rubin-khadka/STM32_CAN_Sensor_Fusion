@@ -83,10 +83,43 @@ void Task_UpdateDisplay(void)
       break;
 
     case DISPLAY_MODE_DATE_TIME:
-      LCD_SetCursor(0, 0);
-      LCD_SendString("TIME:    ");
-      LCD_SetCursor(1, 0);
-      LCD_SendString("DATE:    ");
+      if(can_rx_data.time_updated)
+      {
+        can_rx_data.time_updated = 0;
+        // Line 0: Time
+        LCD_SetCursor(0, 0);
+        LCD_SendString("TIME: ");
+
+        // Hours
+        if(can_rx_data.hour < 10)
+          LCD_SendData('0');
+        LCD_SendNumber(can_rx_data.hour);
+        LCD_SendData(':');
+
+        // Minutes
+        if(can_rx_data.min < 10)
+          LCD_SendData('0');
+        LCD_SendNumber(can_rx_data.min);
+        LCD_SendData(':');
+
+        // Seconds
+        if(can_rx_data.sec < 10)
+          LCD_SendData('0');
+        LCD_SendNumber(can_rx_data.sec);
+        LCD_SendString("  ");
+
+        // Line 1: Date (static for now, you can add date data later)
+        LCD_SetCursor(1, 0);
+        LCD_SendString("DATE: 17/05/26");
+
+        // Debug
+        USART1_SendString("\r\n[TIME] ");
+        USART1_SendNumber(can_rx_data.hour);
+        USART1_SendChar(':');
+        USART1_SendNumber(can_rx_data.min);
+        USART1_SendChar(':');
+        USART1_SendNumber(can_rx_data.sec);
+      }
       break;
 
     case DISPLAY_MODE_ACCEL:
@@ -98,14 +131,6 @@ void Task_UpdateDisplay(void)
         float ax_g = Accel_To_g(can_rx_data.accel[0]);
         float ay_g = Accel_To_g(can_rx_data.accel[1]);
         float az_g = Accel_To_g(can_rx_data.accel[2]);
-
-        // DEBUG: Print raw and scaled values
-        USART1_SendString("\r\n[ACCEL] Raw: X=");
-        USART1_SendNumber(can_rx_data.accel[0]);
-        USART1_SendString(" Y=");
-        USART1_SendNumber(can_rx_data.accel[1]);
-        USART1_SendString(" Z=");
-        USART1_SendNumber(can_rx_data.accel[2]);
 
         // Use your new LCD function
         LCD_DisplayAccelScaled(ax_g, ay_g, az_g);

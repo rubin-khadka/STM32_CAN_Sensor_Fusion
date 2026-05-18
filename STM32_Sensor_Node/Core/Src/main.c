@@ -233,12 +233,12 @@ int main(void)
       mpu_count = 0;
       Task_MPU6050_Send();  // Read and Send
     }
-//
-//    if(timestamp_count++ >= SEND_TIME_TICKS)
-//    {
-//      timestamp_count = 0;
-//     CAN_SendTime();
-//    }
+
+    if(timestamp_count++ >= SEND_TIME_TICKS)
+    {
+      timestamp_count = 0;
+      CAN_SendTime();
+    }
 
     TIMER3_WaitPeriod(); // 10ms heartbeat
   }

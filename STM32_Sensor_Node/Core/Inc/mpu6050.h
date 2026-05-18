@@ -12,7 +12,7 @@
 #include "stdint.h"
 
 // MPU6050 I2C address (7-bit)
-#define MPU6050_ADDR    0x68
+#define MPU6050_ADDR    0x69
 
 // Register addresses
 #define MPU6050_WHO_AM_I        0x75

@@ -122,14 +122,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
           can_rx_data.accel[1] = (rxData[2] << 8) | rxData[3];
           can_rx_data.accel[2] = (rxData[4] << 8) | rxData[5];
           can_rx_data.accel_updated = 1;
-
-          // DEBUG: Print raw and scaled values
-          USART1_SendString("\r\n[ACCEL] Raw: X=");
-          USART1_SendNumber(can_rx_data.accel[0]);
-          USART1_SendString(" Y=");
-          USART1_SendNumber(can_rx_data.accel[1]);
-          USART1_SendString(" Z=");
-          USART1_SendNumber(can_rx_data.accel[2]);
         }
         break;
 

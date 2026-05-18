@@ -47,7 +47,7 @@ uint8_t DS3231_Init(void)
     current_time.hour = 21;
     current_time.dayofweek = 5;
     current_time.dayofmonth = 6;
-    current_time.month = 3;
+    current_time.month = 4;
     current_time.year = 26;  // 2026
 
     DS3231_SetTime(&current_time);
