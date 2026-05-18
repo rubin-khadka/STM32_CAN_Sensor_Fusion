@@ -47,18 +47,6 @@ static uint8_t BCD_To_Dec(uint8_t bcd)
   return ((bcd >> 4) * 10) + (bcd & 0x0F);
 }
 
-// Scale accelerometer raw to g (±2g range: 16384 LSB/g)
-static float Accel_To_g(int16_t raw)
-{
-  return raw / 16384.0f;
-}
-
-// Scale gyroscope raw to °/s (±250°/s range: 131 LSB/°/s)
-static float Gyro_To_dps(int16_t raw)
-{
-  return raw / 131.0f;
-}
-
 // Print float with 2 decimal places
 void Print_Float(float value)
 {
@@ -134,6 +122,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
           can_rx_data.accel[1] = (rxData[2] << 8) | rxData[3];
           can_rx_data.accel[2] = (rxData[4] << 8) | rxData[5];
           can_rx_data.accel_updated = 1;
+
+          // DEBUG: Print raw and scaled values
+          USART1_SendString("\r\n[ACCEL] Raw: X=");
+          USART1_SendNumber(can_rx_data.accel[0]);
+          USART1_SendString(" Y=");
+          USART1_SendNumber(can_rx_data.accel[1]);
+          USART1_SendString(" Z=");
+          USART1_SendNumber(can_rx_data.accel[2]);
         }
         break;
 
@@ -162,11 +158,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         {
           can_rx_data.display_mode = rxData[0];
           can_rx_data.display_mode_updated = 1;
-
-          // ADD THIS DEBUG PRINT
-          USART1_SendString("\r\n[CAN RX] Display Mode: ");
-          USART1_SendNumber(rxData[0]);
-          USART1_SendString("\r\n");
         }
         break;
 
@@ -189,80 +180,5 @@ void CAN_ProcessNewData(void)
 
     // Update PWM
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, led_brightness);
-  }
-
-  // Process temperature/humidity
-  if(can_rx_data.temp_hum_updated)
-  {
-    can_rx_data.temp_hum_updated = 0;
-    temperature = can_rx_data.temp_val;
-    humidity = can_rx_data.hum_val;
-
-    USART1_SendString("\r\n[Temp/Hum] ");
-    USART1_SendNumber(temperature / 10);
-    USART1_SendChar('.');
-    USART1_SendNumber(temperature % 10);
-    USART1_SendString("C, ");
-    USART1_SendNumber(humidity / 10);
-    USART1_SendChar('.');
-    USART1_SendNumber(humidity % 10);
-    USART1_SendString("%");
-  }
-
-  // Process accelerometer
-  if(can_rx_data.accel_updated)
-  {
-    can_rx_data.accel_updated = 0;
-
-    float ax_g = Accel_To_g(can_rx_data.accel[0]);
-    float ay_g = Accel_To_g(can_rx_data.accel[1]);
-    float az_g = Accel_To_g(can_rx_data.accel[2]);
-
-    USART1_SendString("\r\nAccel (g): ");
-    Print_Float(ax_g);
-    USART1_SendString(", ");
-    Print_Float(ay_g);
-    USART1_SendString(", ");
-    Print_Float(az_g);
-  }
-
-  // Process gyroscope
-  if(can_rx_data.gyro_updated)
-  {
-    can_rx_data.gyro_updated = 0;
-
-    float gx_dps = Gyro_To_dps(can_rx_data.gyro[0]);
-    float gy_dps = Gyro_To_dps(can_rx_data.gyro[1]);
-    float gz_dps = Gyro_To_dps(can_rx_data.gyro[2]);
-
-    USART1_SendString("\r\nGyro (°/s): ");
-    Print_Float(gx_dps);
-    USART1_SendString(", ");
-    Print_Float(gy_dps);
-    USART1_SendString(", ");
-    Print_Float(gz_dps);
-  }
-
-  // Process timestamp
-  if(can_rx_data.time_updated)
-  {
-    can_rx_data.time_updated = 0;
-
-    last_hour = can_rx_data.hour;
-    last_minute = can_rx_data.min;
-    last_second = can_rx_data.sec;
-
-    USART1_SendString("\r\nTime: ");
-    if(can_rx_data.hour < 10)
-      USART1_SendChar('0');
-    USART1_SendNumber(can_rx_data.hour);
-    USART1_SendChar(':');
-    if(can_rx_data.min < 10)
-      USART1_SendChar('0');
-    USART1_SendNumber(can_rx_data.min);
-    USART1_SendChar(':');
-    if(can_rx_data.sec < 10)
-      USART1_SendChar('0');
-    USART1_SendNumber(can_rx_data.sec);
   }
 }
