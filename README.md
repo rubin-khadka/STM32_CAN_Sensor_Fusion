@@ -46,6 +46,9 @@ The system demonstrates real-world CAN bus communication between embedded nodes 
 ### Sensor Node
 <img width="986" height="536" alt="Schematic Diagram Sensor Node" src="https://github.com/user-attachments/assets/7a8b80c3-707a-4f8c-8e25-e38a49c8d596" />
 
+### Display Node
+<img width="1166" height="387" alt="Schematic Diagram Display Node" src="https://github.com/user-attachments/assets/1e4d24e5-e010-42eb-8eaa-aa2206e4754a" />
+
 ## Pin Configuration
 ### Sensor Node
 | Component | STM32 Pin | Notes |
