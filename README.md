@@ -43,6 +43,8 @@ The system demonstrates real-world CAN bus communication between embedded nodes 
 - CAN Transceiver (SN65HVD230 or TJA1050)
 
 ## Project Schematic
+### Sensor Node
+<img width="986" height="536" alt="Schematic Diagram Sensor Node" src="https://github.com/user-attachments/assets/7a8b80c3-707a-4f8c-8e25-e38a49c8d596" />
 
 ## Pin Configuration
 ### Sensor Node
