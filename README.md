@@ -26,6 +26,8 @@ The system demonstrates real-world CAN bus communication between embedded nodes 
 
 ## Video Demonstration
 
+https://github.com/user-attachments/assets/75e0664d-9d02-4e17-9560-b4752a7440e1
+
 ## Hardware
 **Sensor Node**
 - STM32F103C8T6 (Blue Pill)
